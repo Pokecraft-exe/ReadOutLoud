@@ -1,0 +1,29 @@
+import PIL
+from pynput.keyboard import Key, Listener
+from tkinter import *
+
+root = Tk()
+root.withdraw()
+shown = False
+lkey = 0
+
+def on_press(key):
+  global shown, lkey
+  if lkey == Key.ctrl_l and key == 'l':
+    if shown:
+      root.attributes('-fullscreen',False)
+      root.iconify()
+      shown=False
+    else:
+      root.attributes('-fullscreen',True)
+      root.deiconify()
+      shown=True
+  lkey=key
+
+def on_release(key):
+  return 0
+
+with Listener(on_press=on_press, on_release=on_release) as listener:
+    root.mainloop()
+    listener.stop()
+    listener.join()
