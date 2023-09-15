@@ -3,3 +3,9 @@ pynput
 pytesseract
 gtts
 pydub
+sounddevice
+numpy
+ffmpeg
+pyuac
+pywin32
+pywintypes
