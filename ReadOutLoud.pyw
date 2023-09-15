@@ -1,13 +1,14 @@
 from tkinter import *
 import os
+
 try:
+  from PIL import ImageStat
+  from audio import *
   from pyscreenshot import grab
   from pynput.keyboard import GlobalHotKeys
   from pynput import mouse
   from pytesseract import pytesseract
   from gtts import gTTS
-  from pydub import AudioSegment
-  from pydub.playback import play
 except:
   import pip
   pip.main(["install", "-r", "requirements.txt"])
@@ -18,7 +19,11 @@ shown = False
 points = [0, 0]
 p = 0
 im = 0
+audio = Audio()
+path = __file__[:__file__.rfind("\\")+1]
 tesseract = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
+
+
 
 def on_click(x, y, button, pressed):
   global points, p, shown, root, im, tesseract
@@ -28,14 +33,32 @@ def on_click(x, y, button, pressed):
         root.attributes('-fullscreen',False)
         root.iconify()
         shown=False
+        if x < points[0]:
+          points[0] ^= x
+          x ^= points[0]
+          points[0] ^= x
+        if y < points[1]:
+          points[1] ^= y
+          y ^= points[1]
+          points[1] ^= y
         im = grab(bbox=(points[0], points[1], x, y))
-        pytesseract.tesseract_cmd = tesseract
-        text = pytesseract.image_to_string(im)
-        myobj = gTTS(text=text, lang='en', slow=False)
-        myobj.save("text.mp3")
-        read = AudioSegment.from_mp3("text.mp3")
-        play(read)
-        os.remove("text.mp3")
+        thresh = 127
+        fn = lambda x : 255 if x > thresh else 0
+        im = im.convert('L').point(fn, mode='1')
+        s = ImageStat.Stat(im).median
+        if s == [0]:
+          fn = lambda x : 0 if x > thresh else 255
+          im = im.convert('L').point(fn, mode='1')
+        try:
+          pytesseract.tesseract_cmd = tesseract
+          text = pytesseract.image_to_string(im)
+          myobj = gTTS(text=text, lang='en', slow=False)
+          myobj.save("text.mp3")
+          audio.openfile(f"{path}text.mp3")
+          audio.play()
+          os.remove("text.mp3")
+        except:
+          p = 0
         p = 0
       else:
         points[0] = x
