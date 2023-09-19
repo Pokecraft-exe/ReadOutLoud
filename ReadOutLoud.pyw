@@ -76,12 +76,16 @@ def on_press():
   global shown, root
   if shown:
     root.attributes('-fullscreen',False)
+    root.attributes('-topmost', False)
     root.iconify()
+    root.update()
     shown=False
   else:
+    root.attributes('-topmost', True)
     root.attributes('-fullscreen',True)
-    root.focus_force()
     root.deiconify()
+    root.focus_force()
+    root.update()
     shown=True
 
 
